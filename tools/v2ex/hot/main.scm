@@ -8,7 +8,7 @@
     "description": "{ source, count, topics[] }"
   },
   "examples": [
-    "openwalk run v2ex/hot"
+    "openwalk exec v2ex/hot"
   ],
   "domains": [
     "www.v2ex.com"

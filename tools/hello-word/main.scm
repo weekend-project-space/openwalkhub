@@ -16,8 +16,8 @@
     "description": "hello <name> 格式的问候语"
   },
   "examples": [
-    "openwalk run hello-word",
-    "openwalk run hello-word -- OpenWalk"
+    "openwalk exec hello-word",
+    "openwalk exec hello-word -- OpenWalk"
   ],
   "domains": [],
   "readOnly": true,
