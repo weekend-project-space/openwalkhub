@@ -1,6 +1,6 @@
 #| @meta
 {
-  "name": "v2ex-hot",
+  "name": "v2ex/hot",
   "description": "获取 V2EX 热门主题并返回结构化结果",
   "args": [],
   "returns": {
