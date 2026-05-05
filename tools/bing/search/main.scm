@@ -55,9 +55,7 @@
   (page-wait-navigation)
   (js-wait "(() => !!document.querySelector('#b_results'))()")
   (list
-    query
     (js-eval "document.title")
-    (js-eval "location.href")
     (js-eval
       (string-append
         "(() => {
