@@ -29,9 +29,9 @@
   ;; 1. 打开页面
   (with-exception-handler
     (lambda (ex)
-      (browser-open url))
+      (page-goto url))
     (lambda ()
-       (page-goto url)))
+      (browser-open url)))
  
  
 
