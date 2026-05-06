@@ -25,13 +25,6 @@
 |#
 
 (define (main args)
-  (define url (if (null? args) "https://www.baidu.com/" (car args)))
-
-
-  ;; 1. 打开页面
-  (open url)
- 
- 
 
   ;; 2. 等待页面加载完成
   (js-wait "document.readyState === 'complete'")
