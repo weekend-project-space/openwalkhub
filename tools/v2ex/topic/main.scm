@@ -36,7 +36,7 @@
         (cons "error" "Missing argument: id")
         (cons "hint" "Provide a topic ID"))
       (let ((topic-id (car args)))
-        (browser-open
+        (open
           (string-append "https://www.v2ex.com/api/topics/show.json?id=" topic-id))
         (js-wait
           "(() => {

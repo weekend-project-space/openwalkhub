@@ -48,7 +48,7 @@
         (if (null? (cdr args))
             "10"
             (car (cdr args)))))
-  (browser-open "https://www.bing.com")
+  (open "https://www.bing.com")
   (js-wait "(() => !!document.querySelector('#sb_form_q'))()")
   (element-fill "#sb_form_q" query)
   (keyboard-press "Enter")

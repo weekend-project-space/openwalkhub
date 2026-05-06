@@ -24,7 +24,7 @@
 |#
 
 (define (main args)
-  (browser-open "https://www.v2ex.com/api/topics/latest.json")
+  (open "https://www.v2ex.com/api/topics/latest.json")
   (js-wait
     "(() => {
       const raw = (

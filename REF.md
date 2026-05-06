@@ -57,7 +57,7 @@ OpenWalk 约定脚本入口为：
           (error-object-message e)
           "unexpected"))
     (lambda ()
-      (tab-new))))
+      (open "https://example.com"))))
 ```
 
 ---
@@ -88,7 +88,7 @@ OpenWalk 约定脚本入口为：
 
 补充说明：
 
-- `browser-open` 在命名会话里如果发现浏览器已打开，会提示先关闭；除非使用 `--new-tab`
+- 推荐在 Scheme 脚本里优先使用 `(open <url>)`，由库函数自动决定是 `browser-open` 还是 `tab-new`
 - `browser-list` 返回的是会话名列表，不是标签页列表
 - `page-snapshot` 返回结构化对象，通常包含标题、URL、文本摘要、交互元素与活动元素信息
 
@@ -313,7 +313,7 @@ cargo run -- run hello-word -- OpenWalk
 (define (main args)
   (define query
     (if (null? args) "OpenAI" (car args)))
-  (browser-open "https://www.bing.com")
+  (open "https://www.bing.com")
   (js-wait "(() => !!document.querySelector('#sb_form_q'))()")
   (element-fill "#sb_form_q" query)
   (keyboard-press "Enter")
