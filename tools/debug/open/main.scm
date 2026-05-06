@@ -14,10 +14,12 @@
     "type": "object",
     "description": "{ openTabs, page, snapshotFile, consoleFile }"
   },
+  "domains":[],
   "examples": [
     "openwalk exec debug/open https://www.baidu.com/"
   ],
   "readOnly": true,
+  "requiresLogin": false,
   "tags": ["debug", "snapshot", "console"]
 }
 |#
