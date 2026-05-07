@@ -38,30 +38,21 @@
 |#
 
 (defun main (args)
-  (define query
-    (if (null? args)
-        "OpenAI"
-        (car args)))
-  (define count-text
-    (if (null? args)
-        "10"
-        (if (null? (cdr args))
-            "10"
-            (car (cdr args)))))
-  (open "https://www.bing.com")
-  (js-wait "(() => !!document.querySelector('#sb_form_q'))()")
-  (element-fill "#sb_form_q" query)
-  (keyboard-press "Enter")
-  (page-wait-navigation)
-  (js-wait "(() => !!document.querySelector('#b_results'))()")
-  (list
-    (js-eval "document.title")
+  (let* ((params (parse-args args))
+         (query (alist-get params "query")))
+    (open "https://www.bing.com")
+    (js-wait "(() => !!document.querySelector('#sb_form_q'))()")
+    (element-fill "#sb_form_q" query)
+    (keyboard-press "Enter")
+    (page-wait-navigation)
+    (js-wait "(() => !!document.querySelector('#b_results'))()")
     (js-eval
       (string-append
         "(() => {
-          const limit = Math.max(1, Number("
-        count-text
-        ") || 10);
+          const params = "
+        (args->js-object args)
+        ";
+          const limit = Math.max(1, Number(params.count) || 10);
           const query = document.querySelector('#sb_form_q')?.value?.trim() || '';
           const results = Array.from(document.querySelectorAll('#b_results li.b_algo'))
             .map((item, index) => {

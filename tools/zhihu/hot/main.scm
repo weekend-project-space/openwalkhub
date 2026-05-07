@@ -33,24 +33,14 @@
 |#
 
 (defun main (args)
-  (define raw-count
-    (if (null? args)
-        #f
-        (string->number (car args))))
-  (define count-text
-    (number->string
-      (cond
-        ((not raw-count) 20)
-        ((< raw-count 1) 1)
-        ((> raw-count 50) 50)
-        (else (inexact->exact (floor raw-count))))))
   (open "https://www.zhihu.com")
   (js-eval
     (string-append
       "(async () => {
-        const limit = Math.min(50, Math.max(1, Number("
-      count-text
-      ") || 20));
+        const params = "
+      (args->js-object args)
+      ";
+        const limit = Math.min(50, Math.max(1, Number(params.count) || 20));
         const source = 'https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50';
 
         try {

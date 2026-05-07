@@ -18,7 +18,7 @@ OpenWalk 约定脚本入口为：
 | 绑定                     | 语法                                      | 说明                                                 |
 | ------------------------ | ----------------------------------------- | ---------------------------------------------------- |
 | `openwalk-script-path`   | `openwalk-script-path`                    | 当前脚本路径字符串                                   |
-| `openwalk-script-meta`   | `openwalk-script-meta`                    | 当前脚本元信息                                       |
+| `openwalk-script-meta`   | `openwalk-script-meta`                    | 当前脚本元信息alist类型                              |
 | `openwalk-args`          | `openwalk-args`                           | 传给脚本的参数列表                                   |
 | `openwalk-output-format` | `(openwalk-output-format value [format])` | 将任意 Scheme 值渲染成 `yaml` / `md` / `json` 字符串 |
 

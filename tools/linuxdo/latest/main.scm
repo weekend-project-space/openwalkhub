@@ -33,26 +33,15 @@
 |#
 
 (defun main (args)
-  (define raw-count
-    (if (null? args)
-        #f
-        (string->number (car args))))
-  (define count-text
-    (number->string
-      (cond
-        ((not raw-count) 30)
-        ((< raw-count 1) 1)
-        ((> raw-count 50) 50)
-        (else (inexact->exact (floor raw-count))))))
-  (define source "https://linux.do/latest.json")
   (open "https://linux.do")
   (js-eval
     (string-append
       "(async () => {
+        const params = "
+      (args->js-object args)
+      ";
         const source = 'https://linux.do/latest.json';
-        const limit = Math.min(50, Math.max(1, Number("
-      count-text
-      ") || 30));
+        const limit = Math.min(50, Math.max(1, Number(params.count) || 30));
 
         try {
           const resp = await fetch(source);

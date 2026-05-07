@@ -33,18 +33,15 @@
 |#
 
 (defun main (args)
-  (define count-text
-    (if (null? args)
-        "20"
-        (car args)))
   (open "https://news.ycombinator.com/")
   (js-wait "(() => document.querySelectorAll('tr.athing').length > 0)()")
   (js-eval
     (string-append
       "(() => {
-        const limit = Math.min(50, Math.max(1, Number("
-      count-text
-      ") || 20));
+        const params = "
+      (args->js-object args)
+      ";
+        const limit = Math.min(50, Math.max(1, Number(params.count) || 20));
         const rows = Array.from(document.querySelectorAll('tr.athing')).slice(0, limit);
         const posts = rows
           .map((row, index) => {
