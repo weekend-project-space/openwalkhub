@@ -25,9 +25,8 @@
 
 (defun main (args)
   (open "https://www.v2ex.com")
-  (js-eval
-    "(async () => {
-      const source = 'https://www.v2ex.com/api/topics/hot.json';
+  (js-call ()
+    " const source = 'https://www.v2ex.com/api/topics/hot.json';
       const resp = await fetch(source);
       if (!resp.ok) return {error: 'HTTP ' + resp.status};
       const topics = await resp.json();
@@ -47,4 +46,4 @@
           url: t.url || '',
         })),
       };
-    })()"))
+    "))

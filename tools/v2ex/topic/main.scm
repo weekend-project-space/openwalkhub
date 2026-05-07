@@ -31,78 +31,69 @@
 |#
 
 (defun main (args)
-  (let* ((params (parse-args args))
-         (topic-id (alist-get params "id")))
-    (if (not topic-id)
-        (list
-          (cons "error" "Invalid argument: id")
-          (cons "hint" "Provide a numeric topic ID"))
-        (begin
-          (open "https://www.v2ex.com")
-          (js-eval
-            (string-append
-              "(async () => {
-                const params = "
-              (args->js-object args)
-              ";
-                const topicId = params.id;
-                const topicSource =
-                  'https://www.v2ex.com/api/topics/show.json?id=' +
-                  encodeURIComponent(topicId);
-                const repliesSource =
-                  'https://www.v2ex.com/api/replies/show.json?topic_id=' +
-                  encodeURIComponent(topicId);
+  (open "https://www.v2ex.com")
+  (js-call args
+      " const topicId = args.id;
+        const topicSource =
+          'https://www.v2ex.com/api/topics/show.json?id=' +
+          encodeURIComponent(topicId);
+        const repliesSource =
+          'https://www.v2ex.com/api/replies/show.json?topic_id=' +
+          encodeURIComponent(topicId);
+        const sourceInfo = {
+          topic_source: topicSource,
+          replies_source: repliesSource,
+        };
+        const httpError = (status, source) => ({
+          ...sourceInfo,
+          error: 'HTTP ' + status,
+          source,
+        });
 
-                const [topicResp, repliesResp] = await Promise.all([
-                  fetch(topicSource),
-                  fetch(repliesSource),
-                ]);
+        const [topicResp, repliesResp] = await Promise.all([
+          fetch(topicSource),
+          fetch(repliesSource),
+        ]);
 
-                if (!topicResp.ok) {
-                  return {
-                    error: 'HTTP ' + topicResp.status,
-                    source: topicSource,
-                  };
-                }
+        if (!topicResp.ok) {
+          return httpError(topicResp.status, topicSource);
+        }
 
-                if (!repliesResp.ok) {
-                  return {
-                    error: 'HTTP ' + repliesResp.status,
-                    source: repliesSource,
-                  };
-                }
+        if (!repliesResp.ok) {
+          return httpError(repliesResp.status, repliesSource);
+        }
 
-                const topics = await topicResp.json();
-                const replies = await repliesResp.json();
-                const topic = topics[0] || null;
+        const [topics, replies] = await Promise.all([
+          topicResp.json(),
+          repliesResp.json(),
+        ]);
+        const topic = topics[0] || null;
 
-                if (!topic) {
-                  return {
-                    error: 'Topic not found',
-                    id: topicId,
-                    topic_source: topicSource,
-                    replies_source: repliesSource,
-                  };
-                }
+        if (!topic) {
+          return {
+            ...sourceInfo,
+            error: 'Topic not found',
+            id: topicId,
+          };
+        }
 
-                return {
-                  topic_source: topicSource,
-                  replies_source: repliesSource,
-                  id: topic.id,
-                  title: topic.title || '',
-                  content: topic.content || '',
-                  node: topic.node?.title || '',
-                  author: topic.member?.username || '',
-                  replies: topic.replies || 0,
-                  created: topic.created || 0,
-                  url: topic.url || '',
-                  comment_count: replies.length,
-                  comments: replies.map((reply, index) => ({
-                    index: index + 1,
-                    id: reply.id,
-                    author: reply.member?.username || '',
-                    content: reply.content || '',
-                    created: reply.created || 0,
-                  })),
-                };
-              })()"))))))
+        return {
+          ...sourceInfo,
+          id: topic.id,
+          title: topic.title || '',
+          content: topic.content || '',
+          node: topic.node?.title || '',
+          author: topic.member?.username || '',
+          replies: topic.replies || 0,
+          created: topic.created || 0,
+          url: topic.url || '',
+          comment_count: replies.length,
+          comments: replies.map((reply, index) => ({
+            index: index + 1,
+            id: reply.id,
+            author: reply.member?.username || '',
+            content: reply.content || '',
+            created: reply.created || 0,
+          })),
+        };
+      "))

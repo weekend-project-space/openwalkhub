@@ -8,6 +8,13 @@
 ;;   (open "https://example.com" #t)
 ;;   (parse-args args)
 ;;   (args->js-object args)
+;;   (js-call args
+;;    "const id = args.id;
+;;    return { id };")
+;;   (js-call 
+;;    "const resp = await fetch('https://www.v2ex.com/api/topics/latest.json');
+;;     return await resp.json();")
+
 
 (define-syntax def
   (syntax-rules ()
@@ -467,3 +474,20 @@
      (%args->js-object args (%script-args-spec)))
     ((_ args spec)
      (%args->js-object args spec))))
+
+(define-syntax js-call
+  (syntax-rules ()
+    ((_  part )
+     (js-eval
+       (string-append
+         "(async () => {"
+         part 
+         "})()")))
+    ((_ args part ...)
+     (js-eval
+       (string-append
+         "(async (args) => {"
+         part ...
+         "})("
+         (args->js-object args)
+         ")")))))
