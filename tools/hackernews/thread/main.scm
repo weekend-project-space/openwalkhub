@@ -39,9 +39,8 @@
       "(() => {
         return !!document.querySelector('.fatitem, .athing.comtr');
       })()")
-    (js-eval
-      "(() => {
-        const textOf = (node) => (node?.textContent || '').replace(/\\s+/g, ' ').trim();
+    (js-call args
+      " const textOf = (node) => (node?.textContent || '').replace(/\\s+/g, ' ').trim();
         const htmlOf = (node) => node?.innerHTML || '';
 
         const titleLink = document.querySelector('.fatitem .titleline > a');
@@ -79,7 +78,7 @@
 
         return {
           post: {
-            id: new URL(location.href).searchParams.get('id') || '',
+            id: args.id || new URL(location.href).searchParams.get('id') || '',
             title: textOf(titleLink),
             url: titleLink?.href || '',
             hn_url: location.href,
@@ -91,4 +90,4 @@
           },
           comments,
         };
-      })()")))
+      ")))
