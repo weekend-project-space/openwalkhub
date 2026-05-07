@@ -24,28 +24,36 @@
 }
 |#
 
-(define (main args)
-  (define url (if (null? args) "https://www.baidu.com/" (car args)))
+(defun %wait-page-ready (retries)
+  (if (<= retries 0)
+      #f
+      (with-exception-handler
+        (lambda (ex)
+          (time-sleep 1000)
+          (%wait-page-ready (- retries 1)))
+        (lambda ()
+          (js-wait "document.readyState === 'complete'")
+          (js-wait
+            "(() => {
+              const body = document.body;
+              if (!body) return false;
 
+              const text = (body.innerText || '').replace(/\\s+/g, ' ').trim();
+              const hasMeaningfulText = text.length > 0;
+              const hasRenderableBody = body.childElementCount > 0;
+
+              return hasRenderableBody && hasMeaningfulText;
+            })()")
+          #t))))
+
+(defun main (args)
+  (define url (if (null? args) "https://www.bing.com/" (car args)))
 
   ;; 1. 打开页面
   (open url)
- 
- 
 
   ;; 2. 等待页面加载完成
-  (js-wait "document.readyState === 'complete'")
-  (js-wait
-    "(() => {
-      const body = document.body;
-      if (!body) return false;
-
-      const text = (body.innerText || '').replace(/\\s+/g, ' ').trim();
-      const hasMeaningfulText = text.length > 0;
-      const hasRenderableBody = body.childElementCount > 0;
-
-      return hasRenderableBody && hasMeaningfulText;
-    })()")
+  (%wait-page-ready 5)
 
   ;; 3. 获取 tabs
   (define tabs (tab-list))

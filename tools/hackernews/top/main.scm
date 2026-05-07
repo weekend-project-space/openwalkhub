@@ -32,7 +32,7 @@
 }
 |#
 
-(define (main args)
+(defun main (args)
   (define count-text
     (if (null? args)
         "20"

@@ -32,36 +32,38 @@
 }
 |#
 
-(define (main args)
-  (define count-text
+(defun main (args)
+  (define raw-count
     (if (null? args)
-        "20"
-        (car args)))
-  (define source "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50")
-  (open source)
-  (js-wait
-    "(() => {
-      const raw = (
-        document.body?.innerText ||
-        document.documentElement?.innerText ||
-        ''
-      ).trim();
-      return raw.length > 0;
-    })()")
+        #f
+        (string->number (car args))))
+  (define count-text
+    (number->string
+      (cond
+        ((not raw-count) 20)
+        ((< raw-count 1) 1)
+        ((> raw-count 50) 50)
+        (else (inexact->exact (floor raw-count))))))
+  (open "https://www.zhihu.com")
   (js-eval
     (string-append
-      "(() => {
+      "(async () => {
         const limit = Math.min(50, Math.max(1, Number("
       count-text
       ") || 20));
-        const raw = (
-          document.body?.innerText ||
-          document.documentElement?.innerText ||
-          ''
-        ).trim();
+        const source = 'https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50';
 
         try {
-          const data = JSON.parse(raw);
+          const resp = await fetch(source);
+          if (!resp.ok) {
+            return {
+              error: 'HTTP ' + resp.status,
+              hint: 'Open https://www.zhihu.com first, ensure you can access the API, then retry.',
+              source,
+            };
+          }
+
+          const data = await resp.json();
           const items = (data.data || [])
             .slice(0, limit)
             .map((item, index) => {
@@ -88,7 +90,8 @@
           return {
             error: 'Unexpected response',
             hint: 'Open https://www.zhihu.com first, ensure you can access the API, then retry.',
-            preview: raw.slice(0, 200),
+            detail: String(error),
+            source,
           };
         }
       })()")))

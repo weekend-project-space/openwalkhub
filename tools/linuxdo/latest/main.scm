@@ -32,37 +32,39 @@
 }
 |#
 
-(define (main args)
-  (define count-text
+(defun main (args)
+  (define raw-count
     (if (null? args)
-        "30"
-        (car args)))
+        #f
+        (string->number (car args))))
+  (define count-text
+    (number->string
+      (cond
+        ((not raw-count) 30)
+        ((< raw-count 1) 1)
+        ((> raw-count 50) 50)
+        (else (inexact->exact (floor raw-count))))))
   (define source "https://linux.do/latest.json")
-  (open source)
-  (js-wait
-    "(() => {
-      const raw = (
-        document.body?.innerText ||
-        document.documentElement?.innerText ||
-        ''
-      ).trim();
-      return raw.length > 0;
-    })()")
+  (open "https://linux.do")
   (js-eval
     (string-append
-      "(() => {
+      "(async () => {
         const source = 'https://linux.do/latest.json';
         const limit = Math.min(50, Math.max(1, Number("
       count-text
       ") || 30));
-        const raw = (
-          document.body?.innerText ||
-          document.documentElement?.innerText ||
-          ''
-        ).trim();
 
         try {
-          const data = JSON.parse(raw);
+          const resp = await fetch(source);
+          if (!resp.ok) {
+            return {
+              error: 'HTTP ' + resp.status,
+              hint: 'Open https://linux.do first, ensure you can access the site, then retry.',
+              source,
+            };
+          }
+
+          const data = await resp.json();
           const topics = (data.topic_list?.topics || [])
             .slice(0, limit)
             .map((topic, index) => ({
@@ -98,8 +100,7 @@
             error: 'Unexpected response',
             hint: 'Open https://linux.do first, ensure you can access the site, then retry.',
             source,
-            preview: raw.slice(0, 200),
+            detail: String(error),
           };
         }
       })()")))
-

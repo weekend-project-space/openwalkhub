@@ -37,26 +37,31 @@
 }
 |#
 
-(define (encode-char ch)
+(defun %encode-char (ch)
   (cond
     ((char=? ch #\space) "%20")
     ((char=? ch #\") "%22")
+    ((char=? ch #\') "%27")
     ((char=? ch #\#) "%23")
     ((char=? ch #\%) "%25")
     ((char=? ch #\&) "%26")
     ((char=? ch #\+) "%2B")
+    ((char=? ch #\\) "%5C")
     ((char=? ch #\/) "%2F")
     ((char=? ch #\?) "%3F")
     ((char=? ch #\=) "%3D")
+    ((char=? ch #\newline) "%0A")
+    ((char=? ch #\return) "%0D")
+    ((char=? ch #\tab) "%09")
     (else (string ch))))
 
-(define (url-encode-lite value)
+(defun %url-encode-lite (value)
   (let loop ((chars (string->list value)) (parts '()))
     (if (null? chars)
         (apply string-append (reverse parts))
-        (loop (cdr chars) (cons (encode-char (car chars)) parts)))))
+        (loop (cdr chars) (cons (%encode-char (car chars)) parts)))))
 
-(define (main args)
+(defun main (args)
   (if (null? args)
       (list
         (cons "error" "Missing argument: keyword")
@@ -76,42 +81,34 @@
         (define source
           (string-append
             "https://www.zhihu.com/api/v4/search_v3?q="
-            (url-encode-lite keyword)
+            (%url-encode-lite keyword)
             "&t=general&offset=0&limit="
             count-text))
-        (open
-          source)
-        (js-wait
-          "(() => {
-            const raw = (
-              document.body?.innerText ||
-              document.documentElement?.innerText ||
-              ''
-            ).trim();
-            return raw.length > 0;
-          })()")
+        (open "https://www.zhihu.com")
         (js-eval
           (string-append
-            "(() => {
+            "(async () => {
             const source = '"
             source
             "';
             try {
-              const xhr = new XMLHttpRequest();
-              xhr.open('GET', source, false);
-              xhr.setRequestHeader('accept', 'application/json, text/plain, */*');
-              xhr.send(null);
+              const resp = await fetch(source, {
+                headers: {
+                  accept: 'application/json, text/plain, */*',
+                },
+              });
 
-              if (xhr.status < 200 || xhr.status >= 300) {
+              if (!resp.ok) {
                 return {
-                  error: `HTTP ${xhr.status}`,
-                  hint: xhr.status === 401 || xhr.status === 403
+                  error: `HTTP ${resp.status}`,
+                  hint: resp.status === 401 || resp.status === 403
                     ? 'Open https://www.zhihu.com first, ensure you are logged in if needed, then retry.'
                     : 'Search request failed.',
+                  source,
                 };
               }
 
-              const data = JSON.parse(xhr.responseText || '{}');
+              const data = await resp.json();
               const strip = (html) => (
                 html || ''
               )
@@ -160,6 +157,7 @@
                 error: 'Unexpected response',
                 hint: 'Open https://www.zhihu.com first, ensure you can access the API, then retry.',
                 detail: String(error),
+                source,
               };
             }
           })()")))))

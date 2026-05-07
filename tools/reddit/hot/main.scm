@@ -38,18 +38,25 @@
 }
 |#
 
-(define (main args)
+(defun main (args)
   (define arg1 (if (null? args) #f (car args)))
   (define arg2 (if (or (null? args) (null? (cdr args))) #f (cadr args)))
   (define subreddit
     (if (and arg1 (not (string->number arg1)))
         arg1
         #f))
-  (define count-text
+  (define raw-count
     (cond
-      ((and arg1 (string->number arg1)) arg1)
-      (arg2 arg2)
-      (else "25")))
+      ((and arg1 (string->number arg1)) (string->number arg1))
+      (arg2 (string->number arg2))
+      (else #f)))
+  (define count-text
+    (number->string
+      (cond
+        ((not raw-count) 25)
+        ((< raw-count 1) 1)
+        ((> raw-count 100) 100)
+        (else (inexact->exact (floor raw-count))))))
   (define source
     (if subreddit
         (string-append
@@ -62,27 +69,25 @@
           "https://www.reddit.com/hot.json?limit="
           count-text
           "&raw_json=1")))
-  (open source)
-  (js-wait
-    "(() => {
-      const raw = (
-        document.body?.innerText ||
-        document.documentElement?.innerText ||
-        ''
-      ).trim();
-      return raw.length > 0;
-    })()")
+  (open "https://www.reddit.com")
   (js-eval
     (string-append
-      "(() => {
-        const raw = (
-          document.body?.innerText ||
-          document.documentElement?.innerText ||
-          ''
-        ).trim();
+      "(async () => {
+        const source = '"
+      source
+      "';
 
         try {
-          const data = JSON.parse(raw);
+          const resp = await fetch(source);
+          if (!resp.ok) {
+            return {
+              error: 'HTTP ' + resp.status,
+              hint: 'Open https://www.reddit.com first, ensure you can access the JSON endpoint, then retry.',
+              source,
+            };
+          }
+
+          const data = await resp.json();
           const posts = (data.data?.children || []).map((child, index) => {
             const post = child.data || {};
             return {
@@ -116,7 +121,8 @@
           return {
             error: 'Unexpected response',
             hint: 'Open https://www.reddit.com first, ensure you can access the JSON endpoint, then retry.',
-            preview: raw.slice(0, 200),
+            detail: String(error),
+            source,
           };
         }
       })()")))

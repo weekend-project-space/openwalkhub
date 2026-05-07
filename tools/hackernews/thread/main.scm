@@ -30,7 +30,7 @@
 }
 |#
 
-(define (main args)
+(defun main (args)
   (if (null? args)
       (list
         (cons "error" "Missing argument: id")

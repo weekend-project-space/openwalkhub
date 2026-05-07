@@ -23,41 +23,18 @@
 }
 |#
 
-(define (main args)
-  (open "https://www.v2ex.com/api/topics/latest.json")
-  (js-wait
-    "(() => {
-      const raw = (
-        document.body?.innerText ||
-        document.documentElement?.innerText ||
-        ''
-      ).trim();
-      return raw.includes('\"title\"');
-    })()")
+(defun main (args)
+  (open "https://www.v2ex.com")
+ 
   (js-eval
-    "(() => {
+    "(async () => {
       const source = 'https://www.v2ex.com/api/topics/latest.json';
-      const raw = (
-        document.body?.innerText ||
-        document.documentElement?.innerText ||
-        '[]'
-      ).trim();
-      const topics = JSON.parse(raw);
-
-      return {
-        source,
-        count: topics.length,
-        topics: topics.map((topic, index) => ({
-          index: index + 1,
-          id: topic.id,
-          title: topic.title || '',
-          content: (topic.content || '').slice(0, 300),
-          node: topic.node?.title || '',
-          nodeSlug: topic.node?.name || '',
-          author: topic.member?.username || '',
-          replies: topic.replies || 0,
-          created: topic.created || 0,
-          url: topic.url || '',
-        })),
-      };
+      const resp = await fetch(source);
+      if (!resp.ok) return {error: 'HTTP ' + resp.status};
+      const topics = await resp.json();
+      return {source,count: topics.length, topics: topics.map(t => ({
+        id: t.id, title: t.title,
+        node: t.node?.title, 
+        author: t.member?.username, replies: t.replies
+      }))};
     })()"))

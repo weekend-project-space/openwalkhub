@@ -30,81 +30,76 @@
 }
 |#
 
-(define (main args)
+(defun main (args)
   (if (null? args)
       (list
         (cons "error" "Missing argument: id")
         (cons "hint" "Provide a topic ID"))
       (let ((topic-id (car args)))
-        (open
-          (string-append "https://www.v2ex.com/api/topics/show.json?id=" topic-id))
-        (js-wait
-          "(() => {
-            const raw = (
-              document.body?.innerText ||
-              document.documentElement?.innerText ||
-              ''
-            ).trim();
-            return raw.startsWith('[');
-          })()")
-        (js-eval
-          "(() => {
-            const raw = (
-              document.body?.innerText ||
-              document.documentElement?.innerText ||
-              '[]'
-            ).trim();
-            const topics = JSON.parse(raw);
-            const topic = topics[0] || null;
-            localStorage.setItem(
-              'openwalk-v2ex-topic',
-              JSON.stringify(topic)
-            );
-            return topic;
-          })()")
-        (page-goto
-          (string-append "https://www.v2ex.com/api/replies/show.json?topic_id=" topic-id))
-        (js-wait
-          "(() => {
-            const raw = (
-              document.body?.innerText ||
-              document.documentElement?.innerText ||
-              ''
-            ).trim();
-            return raw.startsWith('[');
-          })()")
-        (js-eval
-          "(() => {
-            const topic = JSON.parse(
-              localStorage.getItem('openwalk-v2ex-topic') || 'null'
-            );
-            const raw = (
-              document.body?.innerText ||
-              document.documentElement?.innerText ||
-              '[]'
-            ).trim();
-            const replies = JSON.parse(raw);
+        (if (not (string->number topic-id))
+            (list
+              (cons "error" "Invalid argument: id")
+              (cons "hint" "Provide a numeric topic ID"))
+            (begin
+              (open "https://www.v2ex.com")
+              (js-eval
+                (string-append
+                  "(async () => {
+                    const topicId = '"
+                  topic-id
+                  "';
+                    const topicSource =
+                      'https://www.v2ex.com/api/topics/show.json?id=' +
+                      encodeURIComponent(topicId);
+                    const repliesSource =
+                      'https://www.v2ex.com/api/replies/show.json?topic_id=' +
+                      encodeURIComponent(topicId);
 
-            if (!topic) {
-              return {
-                error: 'Topic not found',
-              };
-            }
+                    const [topicResp, repliesResp] = await Promise.all([
+                      fetch(topicSource),
+                      fetch(repliesSource),
+                    ]);
 
-            return {
-              id: topic.id,
-              title: topic.title || '',
-              content: topic.content || '',
-              node: topic.node?.title || '',
-              nodeSlug: topic.node?.name || '',
-              author: topic.member?.username || '',
-              replies: topic.replies || 0,
-              created: topic.created || 0,
-              url: topic.url || '',
-              comments: replies.map((reply, index) => ({
-                author: reply.member?.username || '',
-                content: reply.content || '',
-                created: reply.created || 0,
-              })),
-            };
-          })()"))))
+                    if (!topicResp.ok) {
+                      return {
+                        error: 'HTTP ' + topicResp.status,
+                        source: topicSource,
+                      };
+                    }
+
+                    if (!repliesResp.ok) {
+                      return {
+                        error: 'HTTP ' + repliesResp.status,
+                        source: repliesSource,
+                      };
+                    }
+
+                    const topics = await topicResp.json();
+                    const replies = await repliesResp.json();
+                    const topic = topics[0] || null;
+
+                    if (!topic) {
+                      return {
+                        error: 'Topic not found',
+                        id: topicId,
+                      };
+                    }
+
+                    return {
+                      id: topic.id,
+                      title: topic.title || '',
+                      content: topic.content || '',
+                      node: topic.node?.title || '',
+                      author: topic.member?.username || '',
+                      replies: topic.replies || 0,
+                      created: topic.created || 0,
+                      url: topic.url || '',
+                      comments: replies.map((reply, index) => ({
+                        index: index + 1,
+                        id: reply.id,
+                        author: reply.member?.username || '',
+                        content: reply.content || '',
+                        created: reply.created || 0,
+                      })),
+                    };
+                  })()"))))))

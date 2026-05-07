@@ -38,44 +38,45 @@
 }
 |#
 
-(define (main args)
+(defun main (args)
   (if (null? args)
       (list
         (cons "error" "Missing argument: id")
         (cons "hint" "Provide a Linux.do topic ID"))
       (let ((topic-id (car args))
-            (posts-text
+            (raw-count
               (if (or (null? args) (null? (cdr args)))
-                  "20"
-                  (cadr args))))
-        (open
-          (string-append "https://linux.do/t/" topic-id ".json"))
-        (js-wait
-          "(() => {
-            const raw = (
-              document.body?.innerText ||
-              document.documentElement?.innerText ||
-              ''
-            ).trim();
-            return raw.length > 0;
-          })()")
+                  #f
+                  (string->number (cadr args)))))
+        (define posts-text
+          (number->string
+            (cond
+              ((not raw-count) 20)
+              ((< raw-count 1) 1)
+              ((> raw-count 100) 100)
+              (else (inexact->exact (floor raw-count))))))
+        (open "https://linux.do")
         (js-eval
           (string-append
-            "(() => {
+            "(async () => {
               const source = 'https://linux.do/t/"
             topic-id
             ".json';
               const limit = Math.min(100, Math.max(1, Number("
             posts-text
             ") || 20));
-              const raw = (
-                document.body?.innerText ||
-                document.documentElement?.innerText ||
-                ''
-              ).trim();
 
               try {
-                const data = JSON.parse(raw);
+                const resp = await fetch(source);
+                if (!resp.ok) {
+                  return {
+                    error: 'HTTP ' + resp.status,
+                    hint: 'Open https://linux.do first, ensure the topic exists, then retry.',
+                    source,
+                  };
+                }
+
+                const data = await resp.json();
                 const toText = (html) => {
                   if (!html) return '';
                   const div = document.createElement('div');
@@ -134,7 +135,7 @@
                   error: 'Unexpected response',
                   hint: 'Open https://linux.do first, ensure the topic exists, then retry.',
                   source,
-                  preview: raw.slice(0, 200),
+                  detail: String(error),
                 };
               }
             })()")))))

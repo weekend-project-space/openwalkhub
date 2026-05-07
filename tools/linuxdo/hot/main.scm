@@ -39,38 +39,39 @@
 }
 |#
 
-(define (main args)
+(defun %valid-period? (candidate)
+  (member candidate '("daily" "weekly" "monthly" "quarterly" "yearly" "all")))
+
+(defun main (args)
   (define arg1 (if (null? args) #f (car args)))
   (define arg2 (if (or (null? args) (null? (cdr args))) #f (cadr args)))
-  (define count-text
+  (define raw-count
     (cond
-      ((and arg1 (string->number arg1)) arg1)
-      (else "30")))
+      ((and arg1 (string->number arg1)) (string->number arg1))
+      (else #f)))
+  (define count-text
+    (number->string
+      (cond
+        ((not raw-count) 30)
+        ((< raw-count 1) 1)
+        ((> raw-count 50) 50)
+        (else (inexact->exact (floor raw-count))))))
   (define period
     (let ((candidate
             (cond
               ((and arg1 (not (string->number arg1))) arg1)
               (arg2 arg2)
               (else "daily"))))
-      (if (member candidate '("daily" "weekly" "monthly" "quarterly" "yearly" "all"))
+      (if (%valid-period? candidate)
           candidate
           "daily")))
   (define primary-source
     (string-append "https://linux.do/top.json?period=" period))
   (define fallback-source "https://linux.do/latest.json")
-  (open primary-source)
-  (js-wait
-    "(() => {
-      const raw = (
-        document.body?.innerText ||
-        document.documentElement?.innerText ||
-        ''
-      ).trim();
-      return raw.length > 0;
-    })()")
+  (open "https://linux.do")
   (js-eval
     (string-append
-      "(() => {
+      "(async () => {
         const period = '"
       period
       "';
@@ -81,18 +82,6 @@
         const limit = Math.min(50, Math.max(1, Number("
       count-text
       ") || 30));
-
-        const readJson = () => {
-          const raw = (
-            document.body?.innerText ||
-            document.documentElement?.innerText ||
-            ''
-          ).trim();
-          return {
-            raw,
-            data: JSON.parse(raw),
-          };
-        };
 
         const toResult = (data, source) => {
           const topics = (data.topic_list?.topics || [])
@@ -129,33 +118,38 @@
         };
 
         try {
-          const { data } = readJson();
-          if (data?.topic_list?.topics) {
-            return toResult(data, primarySource);
+          const primaryResp = await fetch(primarySource);
+          if (primaryResp.ok) {
+            const data = await primaryResp.json();
+            if (data?.topic_list?.topics) {
+              return toResult(data, primarySource);
+            }
           }
         } catch (error) {
         }
 
         try {
-          const xhr = new XMLHttpRequest();
-          xhr.open('GET', fallbackSource, false);
-          xhr.setRequestHeader('accept', 'application/json, text/plain, */*');
-          xhr.setRequestHeader('x-requested-with', 'XMLHttpRequest');
-          xhr.send(null);
+          const fallbackResp = await fetch(fallbackSource, {
+            headers: {
+              accept: 'application/json, text/plain, */*',
+              'x-requested-with': 'XMLHttpRequest',
+            },
+          });
 
-          if (xhr.status >= 200 && xhr.status < 300) {
-            const fallbackData = JSON.parse(xhr.responseText || '{}');
+          if (fallbackResp.ok) {
+            const fallbackData = await fallbackResp.json();
             return toResult(fallbackData, fallbackSource);
           }
 
           return {
-            error: `HTTP ${xhr.status || 403}`,
+            error: `HTTP ${fallbackResp.status || 403}`,
             hint: 'Open https://linux.do in your browser first, ensure you are logged in if required, then retry.',
           };
         } catch (error) {
           return {
             error: 'Unexpected response',
             hint: 'Open https://linux.do in your browser first, ensure you are logged in if required, then retry.',
+            detail: String(error),
           };
         }
       })()")))

@@ -24,16 +24,14 @@
   "requiresLogin": false,
   "tags": [
     "hello",
-    "demo",
-    "smoke-test"
+    "demo"
   ]
 }
 |#
 
-(define (main args)
+(defun main (args)
   (define target
     (if (null? args)
         "world"
         (car args)))
   (string-append "hello " target))
-

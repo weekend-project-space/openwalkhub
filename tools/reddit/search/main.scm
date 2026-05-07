@@ -37,92 +37,105 @@
 }
 |#
 
-(define (encode-char ch)
+(defun %encode-char (ch)
   (cond
     ((char=? ch #\space) "%20")
     ((char=? ch #\") "%22")
+    ((char=? ch #\') "%27")
     ((char=? ch #\#) "%23")
     ((char=? ch #\%) "%25")
     ((char=? ch #\&) "%26")
     ((char=? ch #\+) "%2B")
+    ((char=? ch #\\) "%5C")
     ((char=? ch #\/) "%2F")
     ((char=? ch #\?) "%3F")
     ((char=? ch #\=) "%3D")
+    ((char=? ch #\newline) "%0A")
+    ((char=? ch #\return) "%0D")
+    ((char=? ch #\tab) "%09")
     (else (string ch))))
 
-(define (url-encode-lite value)
+(defun %url-encode-lite (value)
   (let loop ((chars (string->list value)) (parts '()))
     (if (null? chars)
         (apply string-append (reverse parts))
-        (loop (cdr chars) (cons (encode-char (car chars)) parts)))))
+        (loop (cdr chars) (cons (%encode-char (car chars)) parts)))))
 
-(define (main args)
+(defun main (args)
   (if (null? args)
       (list
         (cons "error" "Missing argument: query")
         (cons "hint" "Provide a search query"))
       (let ((query (car args))
-            (count-text
+            (raw-count
               (if (or (null? args) (null? (cdr args)))
-                  "25"
-                  (cadr args))))
-        (open
+                  #f
+                  (string->number (cadr args)))))
+        (define count-text
+          (number->string
+            (cond
+              ((not raw-count) 25)
+              ((< raw-count 1) 1)
+              ((> raw-count 100) 100)
+              (else (inexact->exact (floor raw-count))))))
+        (define source
           (string-append
             "https://www.reddit.com/search.json?q="
-            (url-encode-lite query)
+            (%url-encode-lite query)
             "&sort=relevance&t=all&limit="
             count-text
             "&raw_json=1"))
-        (js-wait
-          "(() => {
-            const raw = (
-              document.body?.innerText ||
-              document.documentElement?.innerText ||
-              ''
-            ).trim();
-            return raw.length > 0;
-          })()")
+        (open "https://www.reddit.com")
         (js-eval
-          "(() => {
-            const raw = (
-              document.body?.innerText ||
-              document.documentElement?.innerText ||
-              ''
-            ).trim();
+          (string-append
+            "(async () => {
+              const source = '"
+            source
+            "';
 
-            try {
-              const data = JSON.parse(raw);
-              const posts = (data.data?.children || []).map((child, index) => {
-                const post = child.data || {};
+              try {
+                const resp = await fetch(source);
+                if (!resp.ok) {
+                  return {
+                    error: 'HTTP ' + resp.status,
+                    hint: 'Open https://www.reddit.com first, ensure you can access the JSON endpoint, then retry.',
+                    source,
+                  };
+                }
+
+                const data = await resp.json();
+                const posts = (data.data?.children || []).map((child, index) => {
+                  const post = child.data || {};
+                  return {
+                    rank: index + 1,
+                    id: post.name || '',
+                    title: post.title || '',
+                    author: post.author || '',
+                    subreddit: post.subreddit_name_prefixed || '',
+                    score: post.score || 0,
+                    num_comments: post.num_comments || 0,
+                    created_utc: post.created_utc || 0,
+                    url: post.url || '',
+                    permalink: post.permalink
+                      ? `https://www.reddit.com${post.permalink}`
+                      : '',
+                    selftext_preview: (post.selftext || '').slice(0, 200),
+                    is_self: !!post.is_self,
+                    link_flair_text: post.link_flair_text || null,
+                  };
+                });
+
                 return {
-                  rank: index + 1,
-                  id: post.name || '',
-                  title: post.title || '',
-                  author: post.author || '',
-                  subreddit: post.subreddit_name_prefixed || '',
-                  score: post.score || 0,
-                  num_comments: post.num_comments || 0,
-                  created_utc: post.created_utc || 0,
-                  url: post.url || '',
-                  permalink: post.permalink
-                    ? `https://www.reddit.com${post.permalink}`
-                    : '',
-                  selftext_preview: (post.selftext || '').slice(0, 200),
-                  is_self: !!post.is_self,
-                  link_flair_text: post.link_flair_text || null,
+                  query: new URL(source).searchParams.get('q') || '',
+                  count: posts.length,
+                  posts,
                 };
-              });
-
-              return {
-                query: new URL(location.href).searchParams.get('q') || '',
-                count: posts.length,
-                posts,
-              };
-            } catch (error) {
-              return {
-                error: 'Unexpected response',
-                hint: 'Open https://www.reddit.com first, ensure you can access the JSON endpoint, then retry.',
-                preview: raw.slice(0, 200),
-              };
-            }
-          })()"))))
+              } catch (error) {
+                return {
+                  error: 'Unexpected response',
+                  hint: 'Open https://www.reddit.com first, ensure you can access the JSON endpoint, then retry.',
+                  detail: String(error),
+                  source,
+                };
+              }
+            })()")))))

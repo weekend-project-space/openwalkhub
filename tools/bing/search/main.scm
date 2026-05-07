@@ -37,7 +37,7 @@
 }
 |#
 
-(define (main args)
+(defun main (args)
   (define query
     (if (null? args)
         "OpenAI"
