@@ -25,7 +25,7 @@
 
 (defun main (args)
   (open "https://www.v2ex.com")
-  (js-call ()
+  (js-call 
     " const source = 'https://www.v2ex.com/api/topics/hot.json';
       const resp = await fetch(source);
       if (!resp.ok) return {error: 'HTTP ' + resp.status};
