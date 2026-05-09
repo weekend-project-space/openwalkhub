@@ -6,6 +6,10 @@
 ;;   (defun add (a b) (+ a b))
 ;;   (open "https://example.com")
 ;;   (open "https://example.com" #t)
+;;   (script-dir)
+;;   (read-file-text "/tmp/example.js")
+;;   (read-sibling-file "main.js")
+;;   (js-file-call "main.js" args)
 ;;   (parse-args args)
 ;;   (args->js-object args)
 ;;   (js-call args
@@ -88,6 +92,37 @@
      (%open-impl url #f))
     ((_ url no-reuse-tab)
      (%open-impl url no-reuse-tab))))
+
+(defun %string-last-index (text target)
+  (let loop ((index (- (string-length text) 1)))
+    (if (< index 0)
+        #f
+        (if (char=? (string-ref text index) target)
+            index
+            (loop (- index 1))))))
+
+(defun %path-dirname (path)
+  (let ((slash-index (%string-last-index path #\/)))
+    (if slash-index
+        (substring path 0 slash-index)
+        ".")))
+
+(defun script-dir ()
+  (%path-dirname openwalk-script-path))
+
+(defun read-file-text (path)
+  (let ((port (open-input-file path)))
+    (let loop ((chars '()))
+      (let ((ch (read-char port)))
+        (if (eof-object? ch)
+            (begin
+              (close-input-port port)
+              (list->string (reverse chars)))
+            (loop (cons ch chars)))))))
+
+(defun read-sibling-file (name)
+  (read-file-text
+    (string-append (script-dir) "/" name)))
 
 (defun %parse-args-error (message)
   (error (string-append "parse-args: " message)))
@@ -491,3 +526,12 @@
          "})("
          (args->js-object args)
          ")")))))
+
+(defun js-file-call (filename args)
+  (js-eval
+    (string-append
+      "("
+      (read-sibling-file filename)
+      ")("
+      (args->js-object args)
+      ")")))
