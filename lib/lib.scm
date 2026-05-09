@@ -110,15 +110,19 @@
 (defun script-dir ()
   (%path-dirname openwalk-script-path))
 
+(defun %read-port-all-text (port)
+  (let ((out (open-output-string)))
+    (do ((chunk (read-string 4096 port)
+                (read-string 4096 port)))
+        ((eof-object? chunk)
+         (get-output-string out))
+      (write-string chunk out))))
+
 (defun read-file-text (path)
   (let ((port (open-input-file path)))
-    (let loop ((chars '()))
-      (let ((ch (read-char port)))
-        (if (eof-object? ch)
-            (begin
-              (close-input-port port)
-              (list->string (reverse chars)))
-            (loop (cons ch chars)))))))
+    (let ((text (%read-port-all-text port)))
+      (close-input-port port)
+      text)))
 
 (defun read-sibling-file (name)
   (read-file-text
