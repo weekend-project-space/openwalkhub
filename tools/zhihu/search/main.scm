@@ -39,4 +39,4 @@
 
 (defun main (args)
   (open "https://www.zhihu.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

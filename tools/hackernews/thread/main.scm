@@ -39,4 +39,4 @@
       "(() => {
         return !!document.querySelector('.fatitem, .athing.comtr');
       })()")
-    (js-file-call "main.js" args)))
+    (js-run "main.js" args)))

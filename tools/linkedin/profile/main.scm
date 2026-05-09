@@ -32,4 +32,4 @@
 
 (defun main (args)
   (open "https://www.linkedin.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

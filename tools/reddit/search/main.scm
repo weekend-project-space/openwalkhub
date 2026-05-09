@@ -66,4 +66,4 @@
 
 (defun main (args)
   (open "https://www.reddit.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

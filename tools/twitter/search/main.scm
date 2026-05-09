@@ -46,4 +46,4 @@
 
 (defun main (args)
   (open "https://x.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

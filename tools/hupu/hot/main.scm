@@ -25,4 +25,4 @@
 
 (defun main (args)
   (open "https://bbs.hupu.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

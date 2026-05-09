@@ -33,4 +33,4 @@
 
 (defun main (args)
   (open "https://www.producthunt.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

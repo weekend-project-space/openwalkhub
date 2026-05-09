@@ -40,4 +40,4 @@
 
 (defun main (args)
   (open "https://stackoverflow.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

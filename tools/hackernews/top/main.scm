@@ -35,4 +35,4 @@
 (defun main (args)
   (open "https://news.ycombinator.com/")
   (js-wait "(() => document.querySelectorAll('tr.athing').length > 0)()")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

@@ -34,4 +34,4 @@
 
 (defun main (args)
   (open "https://t.bilibili.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

@@ -39,4 +39,4 @@
 
 (defun main (args)
   (open "https://so.csdn.net")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

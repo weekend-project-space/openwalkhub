@@ -41,4 +41,4 @@
 
 (defun main (args)
   (open "https://s.weibo.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

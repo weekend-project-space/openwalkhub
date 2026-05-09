@@ -9,7 +9,7 @@
 ;;   (script-dir)
 ;;   (read-file-text "/tmp/example.js")
 ;;   (read-sibling-file "main.js")
-;;   (js-file-call "main.js" args)
+;;   (js-run "main.js" args)
 ;;   (parse-args args)
 
 
@@ -500,7 +500,7 @@
     ((_ args spec)
      (%parse-args args spec))))
 
-(defun js-file-call (filename args)
+(defun js-run (filename args)
   (js-eval
     (string-append
       "("

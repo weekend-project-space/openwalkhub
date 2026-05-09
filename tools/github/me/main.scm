@@ -26,4 +26,4 @@
 
 (defun main (args)
   (open "https://github.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

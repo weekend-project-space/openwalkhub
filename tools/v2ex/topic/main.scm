@@ -32,4 +32,4 @@
 
 (defun main (args)
   (open "https://www.v2ex.com")
-  (js-file-call "main.js" args))
+  (js-run "main.js" args))

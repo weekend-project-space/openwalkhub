@@ -46,4 +46,4 @@
     (keyboard-press "Enter")
     (page-wait-navigation)
     (js-wait "(() => !!document.querySelector('#b_results'))()")
-    (js-file-call "main.js" args)))
+    (js-run "main.js" args)))

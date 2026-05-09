@@ -55,4 +55,4 @@
 (defun main (args)
   (let ((normalized-args (%normalized-args args)))
     (open "https://www.reddit.com")
-    (js-file-call "main.js" normalized-args)))
+    (js-run "main.js" normalized-args)))
