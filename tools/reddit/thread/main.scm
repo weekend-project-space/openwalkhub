@@ -41,12 +41,21 @@
         };
       }
 
-      const source = postUrl.endsWith('/')
-        ? postUrl + '.json?limit=500&depth=10&raw_json=1'
-        : postUrl + '/.json?limit=500&depth=10&raw_json=1';
+      let path = postUrl
+        .replace(/https?:\\/\\/[^/]*/, '')
+        .replace(/\\?.*/, '')
+        .replace(/\\/*$/, '/');
+      const match = path.match(/(\\/r\\/[^/]+\\/comments\\/[^/]+\\/)/);
+      if (match) {
+        path = match[1];
+      }
+      const source =
+        'https://www.reddit.com' +
+        path +
+        '.json?limit=500&depth=10&raw_json=1';
 
       try {
-        const resp = await fetch(source);
+        const resp = await fetch(source, {credentials: 'include'});
         if (!resp.ok) {
           return {
             error: 'HTTP ' + resp.status,
