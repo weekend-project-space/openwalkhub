@@ -27,7 +27,6 @@
 - 默认使用 `(js-file-call "main.js" args)`，把大段浏览器逻辑放到 `main.js`
 - `main.scm` 负责 `open`、`js-wait`、参数归一化，以及极少量 Scheme 侧编排
 - `main.js` 统一写成 `async (args) => { ... }`，在 JS 中直接通过 `args.xxx` 读取参数
-- 只有逻辑非常短、确实更适合贴近入口时，才内联使用 `js-call`
 - 需要兼容位置参数时，可以先在 Scheme 层归一化，再传给 `js-file-call`
 - 纯页面抓取优先使用 `open` + `js-wait` + `js-file-call`
 - API 抓取优先使用 `open` + `js-file-call` + `fetch(...)`

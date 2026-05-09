@@ -11,13 +11,6 @@
 ;;   (read-sibling-file "main.js")
 ;;   (js-file-call "main.js" args)
 ;;   (parse-args args)
-;;   (args->js-object args)
-;;   (js-call args
-;;    "const id = args.id;
-;;    return { id };")
-;;   (js-call 
-;;    "const resp = await fetch('https://www.v2ex.com/api/topics/latest.json');
-;;     return await resp.json();")
 
 
 (define-syntax def
@@ -478,7 +471,7 @@
               (cdr rest)
               (string-append result separator (car rest)))))))
 
-(defun %parsed-args->js-object (parsed spec)
+(defun %parsed-args->js-object-literal (parsed spec)
   (let loop ((spec-rest spec) (parts '()))
     (if (null? spec-rest)
         (string-append "{" (%string-join (reverse parts) ", ") "}")
@@ -497,8 +490,8 @@
                   parts))
               (loop (cdr spec-rest) parts))))))
 
-(defun %args->js-object (args spec)
-  (%parsed-args->js-object (%parse-args args spec) spec))
+(defun %args->js-object-literal (args spec)
+  (%parsed-args->js-object-literal (%parse-args args spec) spec))
 
 (define-syntax parse-args
   (syntax-rules ()
@@ -507,35 +500,11 @@
     ((_ args spec)
      (%parse-args args spec))))
 
-(define-syntax args->js-object
-  (syntax-rules ()
-    ((_ args)
-     (%args->js-object args (%script-args-spec)))
-    ((_ args spec)
-     (%args->js-object args spec))))
-
-(define-syntax js-call
-  (syntax-rules ()
-    ((_  part )
-     (js-eval
-       (string-append
-         "(async () => {"
-         part 
-         "})()")))
-    ((_ args part ...)
-     (js-eval
-       (string-append
-         "(async (args) => {"
-         part ...
-         "})("
-         (args->js-object args)
-         ")")))))
-
 (defun js-file-call (filename args)
   (js-eval
     (string-append
       "("
       (read-sibling-file filename)
       ")("
-      (args->js-object args)
+      (%args->js-object-literal args (%script-args-spec))
       ")")))
