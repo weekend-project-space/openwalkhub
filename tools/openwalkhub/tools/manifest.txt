@@ -1,0 +1,72 @@
+bilibili/comments <bvid> [page] [count] [sort]                   获取 Bilibili 视频评论并返回结构化结果
+bilibili/feed [type] [page] [count]                              获取 Bilibili 关注动态 feed 并返回结构化结果
+bilibili/history [count]                                         获取 Bilibili 观看历史并返回结构化结果
+bilibili/me                                                      获取当前 Bilibili 登录用户信息并返回结构化结果
+bilibili/opus <id>                                               获取 Bilibili 图文动态详情并返回结构化结果
+bilibili/popular [count] [page]                                  获取 Bilibili 热门视频并返回结构化结果
+bilibili/ranking [count] [category]                              获取 Bilibili 排行榜视频并返回结构化结果
+bilibili/search <keyword> [page] [count] [order]                 搜索 Bilibili 视频并返回结构化结果
+bilibili/trending [count]                                        获取 Bilibili 热搜词并返回结构化结果
+bilibili/user-opus <mid> [count]                                 获取 Bilibili 用户图文动态列表并返回结构化结果
+bilibili/video <bvid>                                            获取 Bilibili 视频详情并返回结构化结果
+bing/search <query> [count]                                      Bing 搜索并返回结构化结果
+csdn/search <query> [page]                                       搜索 CSDN 技术文章并返回结构化结果
+debug/current-page                                               输出当前页面状态，将 snapshot 和 console 写入文件
+debug/open [url]                                                 打开页面并输出浏览器状态，将 snapshot 和 console 写入文件
+devto/search <query> [count]                                     搜索 Dev.to 文章并返回结构化结果
+douban/movie-top250 [page]                                       获取豆瓣电影 Top 250 并返回结构化结果
+douban/search <keyword> [count]                                  搜索豆瓣内容并返回结构化结果
+github/fork <repo>                                               Fork 一个 GitHub 仓库并返回结构化结果
+github/issue-create <repo> <title> [body]                        创建 GitHub issue 并返回结构化结果
+github/issues <repo> [state]                                     获取 GitHub 仓库 issue 列表并返回结构化结果
+github/me                                                        获取当前 GitHub 登录用户信息并返回结构化结果
+github/pr-create <repo> <title> <head> [base] [body]             创建 GitHub Pull Request 并返回结构化结果
+github/repo <repo>                                               获取 GitHub 仓库信息并返回结构化结果
+hackernews/thread <id>                                           获取 Hacker News 帖子详情和评论列表并返回结构化结果
+hackernews/top [count]                                           获取 Hacker News 热门帖子并返回结构化结果
+hello-word [name]                                                返回一个简单的问候语，适合验证 Scheme tool 是否工作正常
+hupu/hot                                                         获取虎扑热帖并返回结构化结果
+jike/latest [page] [count]                                       获取 JIKE 最新主题并返回结构化结果
+jike/search <keyword> [count]                                    搜索 JIKE 主题和帖子并返回结构化结果
+jike/tag <tag> [count]                                           获取 JIKE 标签页主题列表并返回结构化结果
+jike/topic <id>                                                  获取 JIKE 主题详情和回复并返回结构化结果
+linkedin/profile <username>                                      获取 LinkedIn 用户 profile 并返回结构化结果
+linkedin/search <query> [count]                                  搜索 LinkedIn 帖子并返回结构化结果
+linuxdo/hot [count] [period]                                     获取 Linux.do 热门主题并返回结构化结果
+linuxdo/latest [count]                                           获取 Linux.do 最新主题并返回结构化结果
+linuxdo/topic <id> [posts]                                       获取 Linux.do 主题详情和帖子列表并返回结构化结果
+openwalk/tools                                                   返回当前项目可用的 OpenWalk 工具目录，直接给出精简命令清单，适合 AI 快速发现能力
+producthunt/today [count]                                        获取 Product Hunt 今日产品并返回结构化结果
+reddit/context <url>                                             获取 Reddit 评论的 ancestor chain 并返回结构化结果
+reddit/hot [subreddit] [count]                                   获取 Reddit 热门帖子并返回结构化结果
+reddit/me                                                        获取当前 Reddit 登录用户信息并返回结构化结果
+reddit/posts [username]                                          获取 Reddit 用户发帖列表并返回结构化结果
+reddit/search <query> [subreddit] [sort] [time] [count] [after]  搜索 Reddit 帖子并返回结构化结果
+reddit/thread <url>                                              获取 Reddit 帖子详情和评论列表并返回结构化结果
+stackoverflow/search <query> [count]                             搜索 Stack Overflow 问题并返回结构化结果
+twitter/bookmarks [count]                                        获取 Twitter 书签列表并返回结构化结果
+twitter/following [count]                                        获取 Following 时间线并返回结构化结果
+twitter/for_you [count]                                          获取 For You 时间线并返回结构化结果
+twitter/notifications [type] [count] [cursor]                    获取 Twitter 通知并返回结构化结果
+twitter/search <query> [count] [type]                            搜索推文并返回结构化结果
+twitter/thread <tweet_id>                                        获取推文对话线程并返回结构化结果
+twitter/tweets <screen_name> [count] [cursor]                    获取用户最近推文并返回结构化结果
+twitter/user <screen_name>                                       获取 Twitter 用户 profile 并返回结构化结果
+v2ex/hot                                                         获取 V2EX 热门主题并返回结构化结果
+v2ex/latest                                                      获取 V2EX 最新主题并返回结构化结果
+v2ex/topic <id>                                                  获取 V2EX 主题详情和回复并返回结构化结果
+weibo/hot [count]                                                获取微博热搜榜并返回结构化结果
+weibo/search <keyword> [count]                                   搜索微博内容并返回结构化结果
+xiaohongshu/note <url>                                           获取小红书笔记页面中的结构化信息
+xiaohongshu/search <keyword> [count]                             搜索小红书公开页面并返回结构化结果
+xiaoyuzhoufm/episode <eid>                                       获取小宇宙单集详情并返回结构化结果
+xiaoyuzhoufm/podcast <pid>                                       获取小宇宙播客详情并返回结构化结果
+youtube/channel [id] [max]                                       获取 YouTube 频道信息和近期视频并返回结构化结果
+youtube/comments [id] [max]                                      获取 YouTube 视频评论并返回结构化结果
+youtube/feed [type] [max]                                        获取 YouTube 首页或订阅 feed 并返回结构化结果
+youtube/search <query> [max]                                     搜索 YouTube 视频并返回结构化结果
+youtube/transcript [id] [lang]                                   获取 YouTube 视频字幕并返回结构化结果
+youtube/video [id]                                               获取 YouTube 视频详情并返回结构化结果
+zhihu/hot [count]                                                获取知乎热榜并返回结构化结果
+zhihu/question <id> [count]                                      获取知乎问题详情和回答列表并返回结构化结果
+zhihu/search <keyword> [count]                                   搜索知乎问题和回答并返回结构化结果

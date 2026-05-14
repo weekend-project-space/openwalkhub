@@ -11,6 +11,8 @@
 ;;   (read-sibling-file "main.js")
 ;;   (js-run "main.js" args)
 ;;   (parse-args args)
+;;   (call-with-input-file path proc)
+;;   (call-with-output-file path proc)
 
 
 (define-syntax def
@@ -508,3 +510,21 @@
       ")("
       (%args->js-object-literal args (%script-args-spec))
       ")")))
+
+(defun call-with-input-file (path proc)
+  (let ((port (open-input-file path)))
+    (dynamic-wind
+      (lambda () #f)
+      (lambda ()
+        (proc port))
+      (lambda ()
+        (close-input-port port)))))
+
+(defun call-with-output-file (path proc)
+  (let ((port (open-output-file path)))
+    (dynamic-wind
+      (lambda () #f)
+      (lambda ()
+        (proc port))
+      (lambda ()
+        (close-output-port port)))))
