@@ -40,7 +40,7 @@
 (defun main (args)
   (let* ((params (parse-args args))
          (query (alist-get params "query")))
-    (open "https://www.bing.com")
+    (open "https://cb.bing.com")
     (js-wait "(() => !!document.querySelector('#sb_form_q'))()")
     (element-fill "#sb_form_q" query)
     (keyboard-press "Enter")
