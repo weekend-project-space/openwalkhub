@@ -66,12 +66,15 @@
 (defun string-contains? (str sub)
   (let ((len (string-length str))
         (sub-len (string-length sub)))
+
     (let loop ((i 0))
       (cond
         ((> (+ i sub-len) len)
          #f)
+
         ((string=? (substring str i (+ i sub-len)) sub)
          #t)
+
         (else
          (loop (+ i 1)))))))
 
@@ -80,10 +83,12 @@
     (let loop ((rest pairs))
       (cond
         ((null? rest) #f)
+
         ((string-contains?
            (caar rest)
            url)
          (cdar rest))
+
         (else
          (loop (cdr rest)))))))
 
@@ -113,11 +118,31 @@
             index
             (loop (- index 1))))))
 
+(defun %path-last-separator-index (path)
+  (let ((slash-index (%string-last-index path #\/))
+        (backslash-index (%string-last-index path #\\)))
+    (cond
+      ((and slash-index backslash-index)
+       (if (> slash-index backslash-index)
+           slash-index
+           backslash-index))
+      (slash-index slash-index)
+      (backslash-index backslash-index)
+      (else #f))))
+
 (defun %path-dirname (path)
-  (let ((slash-index (%string-last-index path #\/)))
-    (if slash-index
-        (substring path 0 slash-index)
-        ".")))
+  (let ((separator-index (%path-last-separator-index path)))
+    (cond
+      ((not separator-index)
+       ".")
+      ;; Preserve the separator for filesystem roots like "/" and "C:\".
+      ((or (= separator-index 0)
+           (and (= separator-index 2)
+                (> (string-length path) 2)
+                (char=? (string-ref path 1) #\:)))
+       (substring path 0 (+ separator-index 1)))
+      (else
+       (substring path 0 separator-index)))))
 
 (defun script-dir ()
   (%path-dirname openwalk-script-path))
@@ -136,9 +161,25 @@
       (close-input-port port)
       text)))
 
+(defun %path-separator (path)
+  (if (%string-last-index path #\\)
+      "\\"
+      "/"))
+
+(define (%path-join dir name)
+
+  (let* ((sep (%path-separator dir))
+         (len (string-length dir)))
+
+    (if (and (> len 0)
+             (or (char=? (string-ref dir (- len 1)) #\/)
+                 (char=? (string-ref dir (- len 1)) #\\)))
+        (string-append dir name)
+        (string-append dir sep name))))
+
 (defun read-sibling-file (name)
   (read-file-text
-    (string-append (script-dir) "/" name)))
+    (%path-join (script-dir) name)))
 
 (defun %parse-args-error (message)
   (error (string-append "parse-args: " message)))
