@@ -1,6 +1,6 @@
 #| @meta
 {
-  "name": "debug/current-page",
+  "name": "debug/page-snapshot",
   "description": "输出当前页面状态，将 snapshot 和 console 写入文件",
   "args": [],
   "returns": {
@@ -9,7 +9,7 @@
   },
   "domains": [],
   "examples": [
-    "openwalk exec debug/current-page"
+    "openwalk exec debug/page-snapshot"
   ],
   "readOnly": true,
   "requiresLogin": false,
