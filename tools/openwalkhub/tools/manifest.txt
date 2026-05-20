@@ -70,3 +70,4 @@ youtube/video [id]                                               获取 YouTube 
 zhihu/hot [count]                                                获取知乎热榜并返回结构化结果
 zhihu/question <id> [count]                                      获取知乎问题详情和回答列表并返回结构化结果
 zhihu/search <keyword> [count]                                   搜索知乎问题和回答并返回结构化结果
+zhihu/zhibo8/matches                                             获取直播吧体育比赛时间信息并返回结构化结果
