@@ -30,8 +30,8 @@
   },
   "examples": [
     "openwalk exec check",
-    "openwalk exec check -- https://example.com",
-    "openwalk exec check -- https://example.com --output file"
+    "openwalk exec check https://example.com",
+    "openwalk exec check https://example.com --output file"
   ],
   "domains": [],
   "readOnly": true,
